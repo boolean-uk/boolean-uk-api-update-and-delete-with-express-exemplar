@@ -107,6 +107,68 @@ async function getBookByID(bookId) {
   return getResult;
 }
 
+async function updateBook(bookData) {
+  const SQL = `
+    UPDATE books
+    SET
+        title = $2,
+        type = $3,
+        author = $4,
+        topic = $5,
+        publicationDate = $6
+    WHERE id = $1 
+    RETURNING *;`;
+    let dbresult = {}
+
+    await db.query(SQL, [bookData.id, bookData.title, bookData.type, bookData.author, bookData.topic, new Date(bookData.publicationDate)])
+    .then(result => dbresult = result.rows[0])
+    .catch(error => {
+      dbresult = {
+        error: {
+          message: "DB error, could not update book: " + error.message,
+          bookToCreate: bookData,
+          code: error.code
+        }
+      }
+    });    
+
+    return dbresult;
+}
+
+async function deleteBook(bookId) {
+  const SQL = `
+    DELETE FROM books
+    WHERE id = $1
+    RETURNING *;
+  `;
+
+  let dbresult = {}
+
+  await db.query(SQL, [bookId])
+    .then((result) => {
+      if(result.rowCount === 0) {
+        dbresult = {
+          error: {
+            message: "Could not delete book. No book with id= ${bookID} exists."
+          }
+        }
+      }
+      else {
+        dbresult = result.rows[0]
+      }
+    })
+    .catch((error) => {
+      console.log("Error deleting...")
+      dbresult = {
+        error: {
+          message: "DB error, could not delete book with id=" + bookId.toString() + ": " + error.message,
+          code: error.code
+        }
+      }
+    });
+  return dbresult;
+}
+
 async function getBooksByType(bookType, topic="") {
   let SQL = `SELECT * FROM books WHERE LOWER(type)=$1;`;
   const SQLWithTopic = `SELECT * FROM books WHERE LOWER(type)=$1 AND topic=$2;`;
@@ -135,4 +197,4 @@ async function getBooksByType(bookType, topic="") {
   return getResult;
 }
 
-module.exports =  {Book, createBook, getAllBooks, getBookByID, getBooksByType};
+module.exports =  {Book, createBook, getAllBooks, getBookByID, updateBook, deleteBook, getBooksByType};

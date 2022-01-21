@@ -37,8 +37,8 @@ app.listen(port, () => {
     } else {
       console.log("\n[DB] Connected...\n");
 
-      Book();
-      Pet();
+      //Book();
+      //Pet();
     }
   });
 

@@ -65,6 +65,36 @@ async function getOneById(req, res) {
   }
 }
 
+// curl -X PUT -H "Content-Type: application/json" -d '{"title": "Lies", "author": "Tonald Drump", "type" : "Fiction", "topic" : "thrille", "publicationDate": "2011-08-09T22:00:00.000Z"}' http://localhost:3030/books/2
+async function updateOneById(req, res) {
+    const bookToUpdate = {
+    id: req.params.id,
+    ...req.body
+  };
+
+  const result = await BookModel.updateBook(bookToUpdate);
+  if(result.error !== undefined) {
+    res.status(500).send(result);
+  }
+  else {
+    res.json({data: result});
+  }
+}
+
+// curl -X DELETE http://localhost:3030/books/2
+async function deleteOneById(req, res) {
+  const bookId = parseInt(req.params.id);
+  const result = await BookModel.deleteBook(bookId);
+  if(result.error !== undefined) {
+    res.status(500).send(result);
+  }
+  else {
+    res.json({data: result});
+  }
+}
+
+
+
 async function getFictionBooks(req, res) {
   console.log("Wanting fiction books")
   //const bookId = parseInt(req.params.id);
@@ -101,4 +131,4 @@ async function getFictionBooks(req, res) {
 
 
 
-module.exports = {createOne, getAll, getOneById, getFictionBooks}
+module.exports = {createOne, getAll, getOneById, updateOneById, deleteOneById, getFictionBooks}
